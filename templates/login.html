@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% from "macros.html" import field %} {% block title
+%}Log in | Kidapawan City Visual Artists{% endblock %} {% block content %}
+<section class="mx-auto max-w-md px-5 py-16 sm:py-24">
+  <h1 class="font-display text-3xl text-white">Log in</h1>
+  <p class="mt-2 text-neutral-400">Sign in to manage your artworks.</p>
+  <form
+    method="post"
+    class="mt-8 space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    {{ field('email', 'Email', 'email', email, True, 'email') }} {{
+    field('password', 'Password', 'password', '', True, 'current-password') }}
+    <label class="flex items-center gap-2 text-sm">
+      <input
+        type="checkbox"
+        name="remember"
+        class="h-4 w-4 rounded border-0 bg-neutral-950 text-brass ring-1 ring-white/20 focus:ring-brass"
+      />
+      Keep me logged in on this device
+    </label>
+    <button
+      class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+    >
+      Log in
+    </button>
+  </form>
+  <p class="mt-6 text-sm text-neutral-400">
+    Don’t have an account?
+    <a
+      href="{{ url_for('register') }}"
+      class="text-white underline underline-offset-4 hover:text-brass"
+      >Sign up as an artist</a
+    >
+  </p>
+</section>
+{% endblock %}

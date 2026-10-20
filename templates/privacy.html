@@ -1,0 +1,28 @@
+{% extends "account_layout.html" %} {% from "macros.html" import toggle %} {%
+block title %}Privacy | Kidapawan City Visual Artists{% endblock %} {% block
+panel %}
+<h1 class="font-display text-3xl text-white sm:text-4xl">Privacy</h1>
+<p class="mt-2 text-neutral-400">Choose what visitors can see about you.</p>
+
+<form
+  method="post"
+  class="mt-8 space-y-6 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  {{ toggle('show_in_directory', 'List me in the Artists directory', 'Show my
+  profile on the Artists page and the home page. My artworks stay visible, and
+  my profile page can still be opened from them.',
+  current_user.show_in_directory) }} {{ toggle('show_member_since', 'Show when I
+  joined', 'Display the “Member since” date on my profile page.',
+  current_user.show_member_since) }}
+  <p class="border-t border-white/10 pt-5 text-sm text-neutral-400">
+    Your email address and your buyers’ contact details are never shown
+    publicly. Buyers can only be seen by you on the Orders page.
+  </p>
+  <button
+    class="rounded-sm bg-brass px-5 py-2.5 font-semibold text-neutral-950 hover:bg-amber-300"
+  >
+    Save privacy settings
+  </button>
+</form>
+{% endblock %}

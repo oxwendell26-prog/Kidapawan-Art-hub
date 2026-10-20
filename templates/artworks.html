@@ -1,0 +1,78 @@
+{% extends "base.html" %} {% from "macros.html" import status_badge, canvas %}
+{% block title %}Artworks | Kidapawan City Visual Artists{% endblock %} {% block
+content %}
+<section class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
+  <h1 class="font-display text-3xl text-white sm:text-5xl">New paintings</h1>
+  <p class="mt-3 text-neutral-400">
+    {{ paintings|length }} artwork{{ '' if paintings|length == 1 else 's' }}
+    from local artists, newest first. Select a painting to see its details and
+    price.
+  </p>
+
+  {% if paintings %}
+  <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for p in paintings %}
+    <li>
+      <article
+        class="group relative h-full overflow-hidden rounded-lg bg-neutral-900 ring-1 ring-white/10 transition hover:ring-brass/60 focus-within:ring-brass/60"
+      >
+        {{ canvas(p, 'aspect-[4/5]') }}
+        <div class="p-5">
+          <div class="flex items-start justify-between gap-3">
+            <h2 class="font-display text-xl leading-snug text-white">
+              <a
+                href="{{ url_for('artwork_detail', artwork_id=p.id) }}"
+                class="after:absolute after:inset-0"
+                >{{ p.title }}</a
+              >
+            </h2>
+            {{ status_badge(p) }}
+          </div>
+          <p class="mt-1 text-sm text-neutral-200">
+            <a
+              href="{{ url_for('artist_detail', artist_id=p.artist_id) }}"
+              class="relative z-10 underline-offset-4 hover:text-white hover:underline"
+              >{{ p.artist_name }}</a
+            >, {{ p.year }}
+          </p>
+          {% if p.size %}
+          <p class="text-sm text-neutral-400">Oil on canvas, {{ p.size }}</p>
+          {% endif %} {% if p.available %}
+          <p class="mt-3 font-medium text-brass">{{ p.price_label }}</p>
+          {% endif %} {% if p.note %}
+          <p class="mt-3 text-sm leading-relaxed text-neutral-400">
+            {{ p.note }}
+          </p>
+          {% endif %} {% if p.can_buy and not (current_user.is_authenticated and
+          current_user.id == p.artist_id) %}
+          <a
+            href="{{ url_for('checkout', artwork_id=p.id) }}"
+            class="relative z-10 mt-4 inline-block rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
+            >Checkout</a
+          >
+          {% endif %}
+        </div>
+      </article>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="mt-10 rounded-lg bg-neutral-900 p-8 ring-1 ring-white/10">
+    <p>No artworks have been posted yet.</p>
+    {% if current_user.is_authenticated %}
+    <a
+      href="{{ url_for('dashboard') }}"
+      class="mt-5 inline-block rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+      >Post the first artwork</a
+    >
+    {% else %}
+    <a
+      href="{{ url_for('register') }}"
+      class="mt-5 inline-block rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+      >Sign up as an artist</a
+    >
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %} {% block content %}
+<section class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+  <div class="grid gap-8 lg:grid-cols-[13rem_1fr]">
+    <aside aria-label="Account menu">
+      <nav
+        class="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
+      >
+        {% for endpoint, label in [('dashboard', 'Dashboard'), ('orders',
+        'Orders'), ('profile', 'Profile'), ('settings', 'Settings'), ('privacy',
+        'Privacy'), ('notifications', 'Notifications')] %} {% if loop.index == 4
+        %}
+        <hr class="my-2 hidden border-white/10 lg:block" />
+        {% endif %} {% set active = request.endpoint == endpoint %}
+        <a
+          href="{{ url_for(endpoint) }}"
+          {%
+          if
+          active
+          %}aria-current="page"
+          {%
+          endif
+          %}
+          class="flex shrink-0 items-center justify-between gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition
+                  {{ 'bg-white/10 text-white ring-1 ring-white/15' if active else 'text-neutral-300 hover:bg-white/5 hover:text-white' }}"
+        >
+          <span>{{ label }}</span>
+          {% if endpoint == 'notifications' and unread_notifications %}
+          <span
+            class="rounded-full bg-brass px-2 py-0.5 text-xs font-semibold text-neutral-950"
+            >{{ unread_notifications }}</span
+          >
+          {% elif endpoint == 'orders' and pending_orders %}
+          <span
+            class="rounded-full bg-brass px-2 py-0.5 text-xs font-semibold text-neutral-950"
+            >{{ pending_orders }}</span
+          >
+          {% endif %}
+        </a>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <div class="min-w-0 {% block panel_width %}max-w-2xl{% endblock %}">
+      {% block panel %}{% endblock %}
+    </div>
+  </div>
+</section>
+{% endblock %}

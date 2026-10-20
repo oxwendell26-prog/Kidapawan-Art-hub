@@ -1,0 +1,286 @@
+{% extends "base.html" %} {% from "macros.html" import canvas, avatar %} {%
+block head %}
+<style>
+  /* The picture light above the hero painting */
+  .picture-light {
+    position: relative;
+  }
+  .picture-light::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 30rem;
+    max-width: 100vw;
+    height: 34rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 2;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 236, 190, 0.26),
+      rgba(255, 236, 190, 0)
+    );
+    clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+    animation: light-on 1.8s ease-out 0.3s both;
+  }
+  @keyframes light-on {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .picture-light::after {
+      animation: none;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+
+<!-- Hero -->
+<section class="relative overflow-hidden border-b border-white/10">
+  <div class="spotlight absolute inset-0" aria-hidden="true"></div>
+  <div
+    class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:pb-28 lg:pt-20"
+  >
+    <div>
+      <h1
+        class="font-display text-4xl leading-[1.1] text-white sm:text-5xl lg:text-6xl"
+      >
+        Where Kidapawan’s artists hang their work.
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-neutral-300">
+        A gallery for the visual artists of Kidapawan City. Browse new
+        paintings, meet the people who made them, and find a piece worth taking
+        home.
+      </p>
+      <div class="mt-9 flex flex-wrap items-center gap-4">
+        {% if hero %}
+        <a
+          href="{{ url_for('artworks') }}"
+          class="rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+          >View artworks</a
+        >
+        <a
+          href="{{ url_for('artists') }}"
+          class="rounded-sm px-6 py-3 font-semibold text-white ring-1 ring-white/25 hover:bg-white/5"
+          >Meet the artists</a
+        >
+        {% else %}
+        <a
+          href="{{ url_for('register') }}"
+          class="rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+          >Be the first artist in the gallery</a
+        >
+        {% endif %}
+      </div>
+      {% if hero %}
+      <p class="mt-6 text-sm text-neutral-400">
+        {{ total_works }} artwork{{ '' if total_works == 1 else 's' }} by {{
+        total_artists }} artist{{ '' if total_artists == 1 else 's' }}
+      </p>
+      {% endif %}
+    </div>
+
+    <figure class="mx-auto w-full max-w-md">
+      <div
+        class="picture-light mx-auto mb-6 h-2 w-40 rounded-full bg-brass shadow-[0_0_24px_rgba(233,180,32,.5)]"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="bg-neutral-900 p-3 shadow-2xl shadow-black/70 ring-1 ring-white/10"
+      >
+        {% if hero %} {{ canvas(hero, 'aspect-[3/4] ring-1 ring-white/20') }} {%
+        else %}
+        <div
+          class="flex aspect-[3/4] items-center justify-center border-2 border-dashed border-white/20 p-8 text-center text-neutral-400"
+        >
+          Your painting could hang here.
+        </div>
+        {% endif %}
+      </div>
+      {% if hero %}
+      <figcaption class="mt-5 border-l-2 border-brass pl-4">
+        <p class="font-display text-xl text-white">
+          <a
+            href="{{ url_for('artwork_detail', artwork_id=hero.id) }}"
+            class="hover:text-brass"
+            >{{ hero.title }}</a
+          >
+        </p>
+        <p class="text-sm text-neutral-300">
+          <a
+            href="{{ url_for('artist_detail', artist_id=hero.artist_id) }}"
+            class="underline-offset-4 hover:text-white hover:underline"
+            >{{ hero.artist_name }}</a
+          >, {{ hero.year }}
+        </p>
+        {% if hero.size %}
+        <p class="text-sm text-neutral-400">Oil on canvas, {{ hero.size }}</p>
+        {% endif %} {% if hero.note %}
+        <p class="mt-2 text-sm text-neutral-400">{{ hero.note }}</p>
+        {% endif %}
+      </figcaption>
+      {% endif %}
+    </figure>
+  </div>
+</section>
+
+<!-- Fresh on the wall -->
+{% if recent %}
+<section class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <h2 class="font-display text-3xl text-white sm:text-4xl">
+      Fresh on the wall
+    </h2>
+    <a
+      href="{{ url_for('artworks') }}"
+      class="text-sm font-medium text-white underline underline-offset-4 hover:text-brass"
+      >See all artworks</a
+    >
+  </div>
+  {% set shapes = ['aspect-[3/4]', 'aspect-square', 'aspect-[4/5]',
+  'aspect-[4/3]'] %}
+  <ul class="mt-10 grid grid-cols-2 items-end gap-x-6 gap-y-10 md:grid-cols-4">
+    {% for p in recent %}
+    <li>
+      <a
+        href="{{ url_for('artwork_detail', artwork_id=p.id) }}"
+        class="group block"
+      >
+        <div
+          class="bg-neutral-900 p-2 ring-1 ring-white/10 transition group-hover:ring-brass/60"
+        >
+          {{ canvas(p, shapes[loop.index0 % 4]) }}
+        </div>
+        <p class="mt-3 font-display text-lg leading-snug text-white">
+          {{ p.title }}
+        </p>
+        <p class="text-sm text-neutral-400">
+          {{ p.artist_name }}, {{ p.year }}
+        </p>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<!-- Statement -->
+<section class="border-y border-white/10 bg-neutral-900/50">
+  <div
+    class="mx-auto grid max-w-7xl gap-8 px-5 py-20 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:items-end"
+  >
+    <h2 class="font-display text-3xl leading-tight text-white sm:text-5xl">
+      A gallery that belongs to the city.
+    </h2>
+    <p class="max-w-md text-lg leading-relaxed text-neutral-300">
+      Every artwork here is posted by the artist who made it. Browse what
+      catches your eye, then find out who is behind it.
+    </p>
+  </div>
+</section>
+
+<!-- Artists -->
+{% if featured_artists %}
+<section class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <h2 class="font-display text-3xl text-white sm:text-4xl">
+      The people behind the work
+    </h2>
+    <a
+      href="{{ url_for('artists') }}"
+      class="text-sm font-medium text-white underline underline-offset-4 hover:text-brass"
+      >Meet all artists</a
+    >
+  </div>
+  <ul class="mt-10 grid gap-6 md:grid-cols-3">
+    {% for a in featured_artists %}
+    <li>
+      <a
+        href="{{ url_for('artist_detail', artist_id=a.id) }}"
+        class="flex h-full items-center gap-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10 transition hover:ring-brass/60"
+      >
+        {{ avatar(a, 'h-20 w-20', 'text-2xl') }}
+        <div class="min-w-0">
+          <p class="font-display text-xl text-white">{{ a.name }}</p>
+          {% if a.focus %}
+          <p class="text-sm text-brass">{{ a.focus }}</p>
+          {% endif %}
+          <p class="mt-1 text-sm text-neutral-400">
+            {{ a.works|length }} artwork{{ '' if a.works|length == 1 else 's' }}
+          </p>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<!-- For artists -->
+<section class="border-t border-white/10 bg-neutral-900/50">
+  <div class="mx-auto max-w-7xl px-5 py-20 sm:px-8">
+    <h2 class="font-display text-3xl text-white sm:text-4xl">
+      Show your work in three steps.
+    </h2>
+    <ol class="mt-10 grid gap-6 md:grid-cols-3">
+      <li class="rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10">
+        <span class="font-display text-4xl text-brass" aria-hidden="true"
+          >1</span
+        >
+        <h3 class="mt-3 font-display text-xl text-white">
+          Create your account
+        </h3>
+        <p class="mt-2 text-neutral-300">
+          Sign up with your email and add a short bio and a profile picture.
+        </p>
+      </li>
+      <li class="rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10">
+        <span class="font-display text-4xl text-brass" aria-hidden="true"
+          >2</span
+        >
+        <h3 class="mt-3 font-display text-xl text-white">
+          Post your paintings
+        </h3>
+        <p class="mt-2 text-neutral-300">
+          Upload an image, then add the title, size, and a short description.
+        </p>
+      </li>
+      <li class="rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10">
+        <span class="font-display text-4xl text-brass" aria-hidden="true"
+          >3</span
+        >
+        <h3 class="mt-3 font-display text-xl text-white">Get discovered</h3>
+        <p class="mt-2 text-neutral-300">
+          Your work appears on the Artworks page and your profile on the Artists
+          page.
+        </p>
+      </li>
+    </ol>
+    <div class="mt-10 flex flex-wrap items-center gap-5">
+      {% if current_user.is_authenticated %}
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+        >Go to your dashboard</a
+      >
+      {% else %}
+      <a
+        href="{{ url_for('register') }}"
+        class="rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+        >Sign up as an artist</a
+      >
+      <a
+        href="{{ url_for('login') }}"
+        class="text-sm font-medium text-white underline underline-offset-4 hover:text-brass"
+        >Already have an account? Log in</a
+      >
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

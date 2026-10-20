@@ -1,0 +1,34 @@
+{% extends "base.html" %} {% from "macros.html" import field %} {% block title
+%}Track your order | Kidapawan City Visual Artists{% endblock %} {% block
+content %}
+<section class="mx-auto max-w-md px-5 py-16 sm:py-24">
+  <h1 class="font-display text-3xl text-white">Track your order</h1>
+  <p class="mt-2 text-neutral-400">
+    Enter the order number and the email you used at checkout to see the status
+    of your order.
+  </p>
+  <form
+    method="post"
+    class="mt-8 space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    {{ field('order_number', 'Order number', 'text',
+    form.get('order_number',''), True, 'off', 'Shown on your order page, for
+    example #12.') }} {{ field('email', 'Email', 'email', form.get('email',''),
+    True, 'email') }}
+    <button
+      class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+    >
+      Find my order
+    </button>
+  </form>
+  <p class="mt-6 text-sm text-neutral-400">
+    Looking to buy?
+    <a
+      href="{{ url_for('artworks') }}"
+      class="text-white underline underline-offset-4 hover:text-brass"
+      >Browse artworks</a
+    >
+  </p>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %} {% from "macros.html" import field %} {% block title
+%}Sign up | Kidapawan City Visual Artists{% endblock %} {% block content %}
+<section class="mx-auto max-w-xl px-5 py-16 sm:py-24">
+  <h1 class="font-display text-3xl text-white">Sign up as an artist</h1>
+  <p class="mt-2 text-neutral-400">
+    Create an account to post your own artworks in the gallery.
+  </p>
+  <form
+    method="post"
+    class="mt-8 space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    {{ field('name', 'Full name', 'text', form.get('name',''), True, 'name', '',
+    errors.get('name','')) }} {{ field('email', 'Email', 'email',
+    form.get('email',''), True, 'email', '', errors.get('email','')) }}
+    <div class="grid gap-5 sm:grid-cols-2">
+      {{ field('password', 'Password', 'password', '', True, 'new-password', 'At
+      least 8 characters.', errors.get('password','')) }} {{ field('confirm',
+      'Confirm password', 'password', '', True, 'new-password', '',
+      errors.get('confirm','')) }}
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2">
+      {{ field('focus', 'Art focus (optional)', 'text', form.get('focus',''),
+      False, 'off', 'Example: Landscapes and nature') }} {{ field('experience',
+      'Experience (optional)', 'text', form.get('experience',''), False, 'off',
+      'Example: 10 years of painting') }}
+    </div>
+    <div>
+      <label for="bio" class="block text-sm font-medium text-white"
+        >Short bio (optional)</label
+      >
+      <textarea
+        id="bio"
+        name="bio"
+        rows="3"
+        maxlength="600"
+        class="mt-1.5 w-full rounded-md border-0 bg-neutral-950 px-3 py-2.5 text-white ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass"
+      >
+{{ form.get('bio','') }}</textarea
+      >
+    </div>
+    <button
+      class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+    >
+      Create account
+    </button>
+  </form>
+  <p class="mt-6 text-sm text-neutral-400">
+    Already have an account?
+    <a
+      href="{{ url_for('login') }}"
+      class="text-white underline underline-offset-4 hover:text-brass"
+      >Log in</a
+    >
+  </p>
+</section>
+{% endblock %}

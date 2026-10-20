@@ -1,0 +1,54 @@
+{% extends "account_layout.html" %} {% from "macros.html" import field %} {%
+block title %}Settings | Kidapawan City Visual Artists{% endblock %} {% block
+panel %}
+<h1 class="font-display text-3xl text-white sm:text-4xl">Settings</h1>
+<p class="mt-2 text-neutral-400">Manage how you sign in to your account.</p>
+
+<form
+  method="post"
+  class="mt-8 space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <input type="hidden" name="action" value="email" />
+  <div>
+    <h2 class="font-display text-xl text-white">Email address</h2>
+    <p class="mt-1 text-sm text-neutral-400">
+      Your current email is
+      <span class="text-white">{{ current_user.email }}</span>. It is never
+      shown on the site.
+    </p>
+  </div>
+  {{ field('new_email', 'New email', 'email', form.get('new_email','') if
+  form.get('action') == 'email' else '', True, 'email', '',
+  errors.get('new_email','')) }} {{ field('email_password', 'Current password',
+  'password', '', True, 'current-password', 'Enter your password to confirm the
+  change.', errors.get('email_password','')) }}
+  <button
+    class="rounded-sm bg-brass px-5 py-2.5 font-semibold text-neutral-950 hover:bg-amber-300"
+  >
+    Update email
+  </button>
+</form>
+
+<form
+  method="post"
+  class="mt-6 space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <input type="hidden" name="action" value="password" />
+  <h2 class="font-display text-xl text-white">Change password</h2>
+  {{ field('current_password', 'Current password', 'password', '', True,
+  'current-password', '', errors.get('current_password','')) }}
+  <div class="grid gap-5 sm:grid-cols-2">
+    {{ field('new_password', 'New password', 'password', '', True,
+    'new-password', 'At least 8 characters.', errors.get('new_password','')) }}
+    {{ field('confirm_password', 'Confirm new password', 'password', '', True,
+    'new-password', '', errors.get('confirm_password','')) }}
+  </div>
+  <button
+    class="rounded-sm bg-brass px-5 py-2.5 font-semibold text-neutral-950 hover:bg-amber-300"
+  >
+    Change password
+  </button>
+</form>
+{% endblock %}

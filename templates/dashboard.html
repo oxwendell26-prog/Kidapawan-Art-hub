@@ -1,0 +1,99 @@
+{% extends "account_layout.html" %}
+{% from "macros.html" import canvas, field, avatar %}
+{% block title %}Dashboard | Kidapawan City Visual Artists{% endblock %}
+{% block panel_width %}max-w-none{% endblock %}
+{% block panel %}
+<div>
+  <div class="flex flex-wrap items-center gap-5">
+    {{ avatar(current_user, 'h-16 w-16', 'text-xl') }}
+    <div>
+      <h1 class="font-display text-3xl text-white sm:text-4xl">{{ current_user.name }}’s dashboard</h1>
+      <p class="mt-1 text-neutral-400">{{ current_user.works|length }} artwork{{ '' if current_user.works|length == 1 else 's' }} in your gallery.
+        <a href="{{ url_for('profile') }}" class="ml-2 text-white underline underline-offset-4 hover:text-brass">Edit profile</a></p>
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-wrap gap-3">
+    <a href="{{ url_for('orders') }}" class="rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300">Orders{% if pending_orders %} ({{ pending_orders }} new){% endif %}</a>
+    <a href="{{ url_for('notifications') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Notifications{% if unread_notifications %} ({{ unread_notifications }} unread){% endif %}</a>
+    <a href="{{ url_for('profile') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Edit profile</a>
+    <a href="{{ url_for('settings') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Settings</a>
+  </div>
+
+  {% if pending_orders %}
+  <a href="{{ url_for('orders') }}" class="mt-8 flex items-center justify-between gap-4 rounded-lg bg-brass/10 px-5 py-4 text-white ring-1 ring-brass/40 hover:bg-brass/20">
+    <span>You have {{ pending_orders }} new order{{ '' if pending_orders == 1 else 's' }} waiting for your response.</span>
+    <span class="shrink-0 text-sm font-medium underline underline-offset-4">View orders</span>
+  </a>
+  {% endif %}
+
+  <div class="mt-10 grid gap-10 xl:grid-cols-3">
+    <!-- Form -->
+    <div class="xl:col-span-1">
+      <h2 class="font-display text-2xl text-white">Add an artwork</h2>
+      <form method="post" enctype="multipart/form-data" class="mt-5 space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {{ field('title', 'Title', 'text', form.get('title',''), True) }}
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          {{ field('year', 'Year', 'number', form.get('year', now_year), True) }}
+          {{ field('size', 'Size', 'text', form.get('size',''), False, 'off', 'e.g. 24 x 36 in') }}
+        </div>
+        {{ field('price', 'Price (₱)', 'number', form.get('price',''), False, 'off', 'Whole pesos. Leave empty to show “Price on request”.') }}
+        <div>
+          <label for="note" class="block text-sm font-medium text-white">Short description</label>
+          <textarea id="note" name="note" rows="3" maxlength="300"
+            class="mt-1.5 w-full rounded-md border-0 bg-neutral-950 px-3 py-2.5 text-white ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass">{{ form.get('note','') }}</textarea>
+        </div>
+        <div>
+          <label for="image" class="block text-sm font-medium text-white">Artwork image</label>
+          <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp"
+            class="mt-1.5 block w-full text-sm text-neutral-300 file:mr-4 file:rounded-sm file:border-0 file:bg-neutral-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-700">
+          <p class="mt-1 text-xs text-neutral-400">JPG, PNG, or WEBP. Up to 5 MB. If left empty, a color placeholder is shown.</p>
+        </div>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="available" value="1" {% if form.get('available') %}checked{% endif %}
+            class="h-4 w-4 rounded border-0 bg-neutral-950 text-brass ring-1 ring-white/20 focus:ring-brass">
+          Still available for purchase
+        </label>
+        <button class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Post artwork</button>
+      </form>
+    </div>
+
+    <!-- My artworks -->
+    <div class="xl:col-span-2">
+      <h2 class="font-display text-2xl text-white">My artworks</h2>
+      {% if current_user.works %}
+      <ul class="mt-5 grid gap-5 sm:grid-cols-2">
+        {% for p in current_user.works %}
+        <li>
+          <article class="h-full overflow-hidden rounded-lg bg-neutral-900 ring-1 ring-white/10">
+            {{ canvas(p, 'aspect-[4/3]') }}
+            <div class="p-5">
+              <h3 class="font-display text-lg text-white">{{ p.title }}</h3>
+              <p class="text-sm text-neutral-300">{{ p.year }}{% if p.size %}, {{ p.size }}{% endif %}</p>
+              <p class="text-sm {{ 'text-emerald-300' if p.status_label == 'Available' else 'text-amber-300' if p.status_label == 'Reserved' else 'text-neutral-400' }}">{{ p.status_label }}</p>
+              <p class="mt-1 text-sm text-neutral-200">{{ p.price_label }}</p>
+              <form method="post" action="{{ url_for('update_price', artwork_id=p.id) }}" class="mt-3 flex gap-2">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="price-{{ p.id }}" class="sr-only">Price in pesos</label>
+                <input id="price-{{ p.id }}" name="price" type="number" min="1" step="1" value="{{ p.price or '' }}" placeholder="Price (₱)"
+                  class="w-full min-w-0 rounded-md border-0 bg-neutral-950 px-3 py-1.5 text-sm text-white ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass">
+                <button class="shrink-0 rounded-sm px-3 py-1.5 text-sm text-white ring-1 ring-white/20 hover:bg-white/5">Save price</button>
+              </form>
+              <form method="post" action="{{ url_for('delete_artwork', artwork_id=p.id) }}" class="mt-4"
+                    onsubmit="return confirm('Delete “{{ p.title|e }}”? This cannot be undone.')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="rounded-sm px-3 py-1.5 text-sm text-red-300 ring-1 ring-red-400/30 hover:bg-red-500/10">Delete</button>
+              </form>
+            </div>
+          </article>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="mt-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10">You have no artworks yet. Use the form to post your first painting.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

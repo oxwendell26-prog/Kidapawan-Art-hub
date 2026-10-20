@@ -1,0 +1,146 @@
+{% extends "base.html" %} {% from "macros.html" import status_badge, canvas,
+avatar %} {% block title %}{{ artwork.title }} by {{ artwork.artist_name }} |
+Kidapawan City Visual Artists{% endblock %} {% block content %}
+<section class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
+  <a
+    href="{{ url_for('artworks') }}"
+    class="text-sm text-neutral-400 underline underline-offset-4 hover:text-white"
+    >Back to all artworks</a
+  >
+
+  <div class="mt-8 grid items-start gap-12 lg:grid-cols-2">
+    <div class="mx-auto w-full max-w-lg lg:max-w-none">
+      <div
+        class="bg-neutral-900 p-3 shadow-2xl shadow-black/60 ring-1 ring-white/10"
+      >
+        {{ canvas(artwork, 'aspect-[4/5] ring-1 ring-white/20') }}
+      </div>
+    </div>
+
+    <div>
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="font-display text-4xl leading-tight text-white sm:text-5xl">
+          {{ artwork.title }}
+        </h1>
+        {{ status_badge(artwork, true) }}
+      </div>
+
+      <a
+        href="{{ url_for('artist_detail', artist_id=artwork.artist_id) }}"
+        class="mt-5 inline-flex items-center gap-3 hover:text-white"
+      >
+        {{ avatar(artwork.artist, 'h-10 w-10', 'text-sm') }}
+        <span class="underline-offset-4 hover:underline"
+          >{{ artwork.artist_name }}</span
+        >
+      </a>
+
+      <div class="mt-8 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10">
+        <p class="text-sm text-neutral-400">Price</p>
+        <p
+          class="mt-1 font-display text-4xl {{ 'text-white' if artwork.available else 'text-neutral-500' }}"
+        >
+          {{ artwork.price_label }}
+        </p>
+        {% if not artwork.available %}
+        <p class="mt-2 text-sm text-neutral-400">This artwork has been sold.</p>
+        {% elif artwork.reserved %}
+        <p class="mt-2 text-sm text-amber-300">
+          This artwork is reserved for a buyer. Check back later.
+        </p>
+        {% elif current_user.is_authenticated and current_user.id ==
+        artwork.artist_id %}
+        <p class="mt-2 text-sm text-neutral-400">This is your artwork.</p>
+        {% elif artwork.price %}
+        <a
+          href="{{ url_for('checkout', artwork_id=artwork.id) }}"
+          class="mt-5 inline-block rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+          >Checkout</a
+        >
+        <p class="mt-3 text-sm text-neutral-400">
+          No payment is taken on this site. The artist will contact you to
+          arrange payment and delivery.
+        </p>
+        {% else %}
+        <p class="mt-2 text-sm text-neutral-400">
+          The artist hasn’t set a price yet, so this painting can’t be ordered.
+        </p>
+        {% endif %}
+      </div>
+
+      {% if artwork.note %}
+      <h2 class="mt-10 font-display text-2xl text-white">
+        About this painting
+      </h2>
+      <p class="mt-3 max-w-xl text-lg leading-relaxed text-neutral-300">
+        {{ artwork.note }}
+      </p>
+      {% endif %}
+
+      <h2 class="mt-10 font-display text-2xl text-white">Details</h2>
+      <dl
+        class="mt-4 grid max-w-xl grid-cols-[8rem_1fr] gap-y-3 text-neutral-300"
+      >
+        <dt class="text-neutral-400">Artist</dt>
+        <dd>
+          <a
+            href="{{ url_for('artist_detail', artist_id=artwork.artist_id) }}"
+            class="underline underline-offset-4 hover:text-white"
+            >{{ artwork.artist_name }}</a
+          >
+        </dd>
+        <dt class="text-neutral-400">Year</dt>
+        <dd>{{ artwork.year }}</dd>
+        <dt class="text-neutral-400">Medium</dt>
+        <dd>Oil on canvas</dd>
+        {% if artwork.size %}
+        <dt class="text-neutral-400">Size</dt>
+        <dd>{{ artwork.size }}</dd>
+        {% endif %} {% if artwork.created_at %}
+        <dt class="text-neutral-400">Posted</dt>
+        <dd>{{ artwork.created_at.strftime('%B %Y') }}</dd>
+        {% endif %}
+      </dl>
+
+      {% if current_user.is_authenticated and current_user.id ==
+      artwork.artist_id %}
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="mt-8 inline-block text-sm font-medium text-white underline underline-offset-4 hover:text-brass"
+        >Manage this artwork in your dashboard</a
+      >
+      {% endif %}
+    </div>
+  </div>
+
+  {% if more %}
+  <div class="mt-20 border-t border-white/10 pt-12">
+    <h2 class="font-display text-2xl text-white sm:text-3xl">
+      More from {{ artwork.artist_name }}
+    </h2>
+    <ul class="mt-8 grid gap-6 sm:grid-cols-3">
+      {% for p in more %}
+      <li>
+        <a
+          href="{{ url_for('artwork_detail', artwork_id=p.id) }}"
+          class="group block"
+        >
+          <div
+            class="bg-neutral-900 p-2 ring-1 ring-white/10 transition group-hover:ring-brass/60"
+          >
+            {{ canvas(p, 'aspect-square') }}
+          </div>
+          <p class="mt-3 font-display text-lg text-white">{{ p.title }}</p>
+          <p
+            class="text-sm {{ 'text-brass' if p.available else 'text-neutral-500' }}"
+          >
+            {{ p.price_label if p.available else 'Sold' }}
+          </p>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
