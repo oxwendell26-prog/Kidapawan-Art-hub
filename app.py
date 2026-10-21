@@ -1440,6 +1440,31 @@ def order_action(order_id, action):
     flash(message, "success")
     return redirect(url_for("orders"))
 
+@app.route("/create-admin")
+def create_admin():
+    # Palitan mo ng gusto mong email at password para sa admin account mo
+    admin_email = "PaoloAdmin143@gmail.com"
+    admin_password = "Adminpaolo143"
+    
+    # Hanapin kung may existing na account na gumagamit ng email na ito
+    user = Artist.query.filter_by(email=admin_email).first()
+    if user:
+        user.account_type = "admin" # o kung ano ang field para sa admin role mo
+        user.is_approved = True
+        db.session.commit()
+        return "Existing account promoted to Admin successfully!"
+    else:
+        # Kung wala pa, gagawa ng bagong admin account
+        from werkzeug.security import generate_password_hash
+        new_admin = Artist(
+            email=admin_email,
+            password=generate_password_hash(admin_password),
+            account_type="admin",
+            is_approved=True
+        )
+        db.session.add(new_admin)
+        db.session.commit()
+        return "New Admin account created successfully!"
 
 # ---------- Admin ----------
 @app.route("/admin")
