@@ -1,0 +1,67 @@
+{% extends "base.html" %} {% from "macros.html" import canvas %} {% block title
+%}Message {{ artwork.artist_name }} | Kidapawan City Visual Artists{% endblock
+%} {% block content %}
+<section class="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
+  <a
+    href="{{ url_for('artwork_detail', artwork_id=artwork.id) }}"
+    class="text-sm text-neutral-400 underline underline-offset-4 hover:text-white"
+    >Back to the painting</a
+  >
+  <h1 class="mt-4 font-display text-3xl text-white sm:text-4xl">
+    Message the artist
+  </h1>
+  <p class="mt-2 text-neutral-400">
+    Ask {{ artwork.artist_name }} about “{{ artwork.title }}”. Your conversation
+    will be saved to your client account.
+  </p>
+
+  <div class="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_1.4fr]">
+    <aside class="rounded-lg bg-neutral-900 p-5 ring-1 ring-white/10">
+      {{ canvas(artwork, 'aspect-[4/3]') }}
+      <p class="mt-4 font-display text-xl text-white">{{ artwork.title }}</p>
+      <p class="text-sm text-neutral-300">
+        {{ artwork.artist_name }}, {{ artwork.year }}
+      </p>
+    </aside>
+
+    <form
+      method="post"
+      class="space-y-5 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <p
+        class="rounded-md bg-neutral-950 p-3 text-sm text-neutral-300 ring-1 ring-white/10"
+      >
+        Sending as {{ current_user.name }} ({{ current_user.email }}). Your
+        reply will be saved in Messages.
+      </p>
+      <div>
+        <label for="message" class="block text-sm font-medium text-white"
+          >Message</label
+        >
+        <textarea
+          id="message"
+          name="message"
+          rows="5"
+          maxlength="2000"
+          required
+          class="mt-1.5 w-full rounded-md border-0 bg-neutral-950 px-3 py-2.5 text-white ring-1 {{ 'ring-2 ring-red-400' if errors.get('message') else 'ring-white/15' }} focus:outline-none focus:ring-2 focus:ring-brass"
+        >
+{{ form.get('message', '') }}</textarea
+        >
+        {% if errors.get('message') %}
+        <p class="mt-1.5 text-sm text-red-300">{{ errors.message }}</p>
+        {% endif %}
+      </div>
+      <p class="text-sm text-neutral-400">
+        You can return to this conversation any time from Messages.
+      </p>
+      <button
+        class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+      >
+        Send message
+      </button>
+    </form>
+  </div>
+</section>
+{% endblock %}

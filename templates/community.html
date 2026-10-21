@@ -1,0 +1,494 @@
+{% extends "base.html" %} {% from "macros.html" import avatar %} {% block title
+%}Community | Kidapawan City Visual Artists{% endblock %} {% block content %}
+<section class="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+  <header class="mb-8">
+    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brass">
+      Artist community
+    </p>
+    <h1
+      id="community-heading"
+      tabindex="-1"
+      class="mt-2 font-display text-4xl text-white focus:outline-none sm:text-5xl"
+    >
+      Community feed
+    </h1>
+    <p class="mt-3 text-neutral-400">
+      Discover works in progress, finished paintings, and moments from local
+      artists.
+    </p>
+  </header>
+
+  <div id="community-feed">
+    {% if current_user.account_type == 'artist' and current_user.is_approved %}
+    <form
+      method="post"
+      action="{{ url_for('create_post') }}"
+      enctype="multipart/form-data"
+      class="mb-8 rounded-xl bg-neutral-900 p-5 ring-1 ring-white/10 sm:p-6"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="flex items-center gap-3">
+        {{ avatar(current_user, 'h-10 w-10', 'text-sm') }}
+        <div>
+          <p class="font-medium text-white">{{ current_user.name }}</p>
+          <p class="text-xs text-neutral-400">Share with the community</p>
+        </div>
+      </div>
+      <label for="caption" class="sr-only">Caption</label>
+      <textarea
+        id="caption"
+        name="caption"
+        rows="3"
+        maxlength="1000"
+        placeholder="What are you creating today?"
+        class="mt-4 w-full resize-y rounded-md border-0 bg-neutral-950 px-3 py-3 text-white placeholder:text-neutral-500 ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass"
+      ></textarea>
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <label for="media" class="block text-sm font-medium text-neutral-200"
+            >Add a photo or video</label
+          >
+          <input
+            id="media"
+            name="media"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,.jpg,.jpeg,.png,.webp,.mp4,.webm"
+            required
+            class="mt-1.5 block max-w-full text-sm text-neutral-400 file:mr-3 file:rounded-sm file:border-0 file:bg-neutral-800 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-700"
+          />
+          <p class="mt-1 text-xs text-neutral-500">
+            JPG, PNG, WEBP, MP4, or WEBM · max 5 MB
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="reset"
+            class="rounded-sm px-5 py-2.5 font-semibold text-neutral-200 ring-1 ring-white/20 transition hover:bg-white/5"
+          >
+            Cancel post
+          </button>
+          <button
+            type="submit"
+            class="rounded-sm bg-brass px-5 py-2.5 font-semibold text-neutral-950 transition hover:bg-amber-300"
+          >
+            Share post
+          </button>
+        </div>
+      </div>
+    </form>
+    {% elif current_user.account_type == 'artist' %}
+    <aside
+      class="mb-8 rounded-xl bg-neutral-900 p-5 text-neutral-300 ring-1 ring-amber-400/30"
+    >
+      Your artist application is pending. You can browse and join the
+      conversation, but posting will be available after approval.
+      <a
+        href="{{ url_for('artist_application_status') }}"
+        class="ml-1 text-white underline underline-offset-4"
+        >Application status</a
+      >
+    </aside>
+    {% elif current_user.is_authenticated %}
+    <aside
+      class="mb-8 rounded-xl bg-neutral-900 p-5 text-neutral-300 ring-1 ring-white/10"
+    >
+      Your client account can like and comment on artists’ posts. Browse the
+      feed below to join the conversation.
+    </aside>
+    {% else %}
+    <aside
+      class="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-neutral-900 p-5 ring-1 ring-white/10"
+    >
+      <p class="text-neutral-300">
+        Sign in to like or comment. Create an artist account to share posts, or
+        a client account to join the conversation.
+      </p>
+      <div class="flex gap-3">
+        <a
+          href="{{ url_for('login') }}"
+          class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5"
+          >Log in</a
+        >
+        <a
+          href="{{ url_for('register') }}"
+          class="rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
+          >Join</a
+        >
+        <a
+          href="{{ url_for('client_register') }}"
+          class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5"
+          >Client account</a
+        >
+      </div>
+    </aside>
+    {% endif %} {% if posts %}
+    <ol class="space-y-6">
+      {% for post in posts %}
+      <li>
+        <article
+          class="overflow-hidden rounded-xl bg-neutral-900 ring-1 ring-white/10"
+        >
+          <header class="flex items-center gap-3 p-5">
+            <a
+              href="{{ url_for('artist_detail', artist_id=post.user_id) }}"
+              class="rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-brass"
+            >
+              {{ avatar(post.artist, 'h-11 w-11', 'text-sm') }}
+            </a>
+            <div class="min-w-0 flex-1">
+              <a
+                href="{{ url_for('artist_detail', artist_id=post.user_id) }}"
+                class="font-semibold text-white hover:text-brass"
+                >{{ post.artist.name }}</a
+              >
+              <time class="block text-xs text-neutral-500"
+                >{{ post.timestamp|ph_time }}</time
+              >
+            </div>
+            {% if current_user.is_authenticated and post.user_id ==
+            current_user.id %}
+            <form
+              method="post"
+              action="{{ url_for('delete_post', post_id=post.id) }}"
+              onsubmit="
+                return confirm(
+                  'Delete this post and its photo or video? This cannot be undone.',
+                );
+              "
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <button
+                class="rounded-sm px-3 py-2 text-sm text-red-300 ring-1 ring-red-400/30 transition hover:bg-red-500/10"
+              >
+                Delete post
+              </button>
+            </form>
+            {% endif %}
+          </header>
+
+          {% if post.media_type == 'video' %}
+          <video
+            data-fullscreen-media
+            data-media-type="video"
+            aria-label="Click the video to view it larger"
+            class="max-h-[42rem] w-full cursor-zoom-in bg-black object-contain"
+            controls
+            preload="metadata"
+            playsinline
+          >
+            <source
+              src="{{ url_for('static', filename='uploads/' ~ post.media_path) }}"
+              type="{{ 'video/mp4' if post.media_path.rsplit('.', 1)[-1].lower() == 'mp4' else 'video/webm' }}"
+            />
+            Your browser does not support this video.
+          </video>
+          {% else %}
+          <img
+            data-fullscreen-media
+            data-media-type="image"
+            src="{{ url_for('static', filename='uploads/' ~ post.media_path) }}"
+            alt="Post by {{ post.artist.name }}"
+            title="Click to view full size"
+            class="max-h-[42rem] w-full cursor-zoom-in bg-neutral-950 object-contain"
+            loading="lazy"
+          />
+          {% endif %}
+
+          <div class="p-5">
+            {% if post.caption %}
+            <p
+              class="whitespace-pre-wrap break-words leading-relaxed text-neutral-200"
+            >
+              {{ post.caption }}
+            </p>
+            {% endif %}
+
+            <div
+              class="mt-4 flex items-center justify-between border-b border-white/10 pb-3 text-sm text-neutral-400"
+            >
+              <span
+                >{{ post.likes|length }} like{{ '' if post.likes|length == 1
+                else 's' }}</span
+              >
+              <span
+                >{{ post.comments|length }} comment{{ '' if post.comments|length
+                == 1 else 's' }}</span
+              >
+            </div>
+
+            {% if current_user.is_authenticated %}
+            <form
+              method="post"
+              action="{{ url_for('toggle_post_like', post_id=post.id) }}"
+              class="border-b border-white/10 py-3"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <button
+                class="w-full rounded-md py-2 text-sm font-semibold transition hover:bg-white/5 {{ 'text-brass' if post.id in liked_ids else 'text-neutral-300 hover:text-white' }}"
+                aria-pressed="{{ 'true' if post.id in liked_ids else 'false' }}"
+              >
+                {{ '♥ Liked' if post.id in liked_ids else '♡ Like' }}
+              </button>
+            </form>
+            {% else %}
+            <p
+              class="border-b border-white/10 py-3 text-center text-sm text-neutral-500"
+            >
+              Log in as an artist to like or comment.
+            </p>
+            {% endif %} {% if post.comments %}
+            <ul class="mt-4 max-h-60 space-y-2 overflow-y-auto pr-1">
+              {% for comment in post.comments %}
+              <li class="flex gap-2.5">
+                {{ avatar(comment.artist, 'h-8 w-8', 'text-xs') }}
+                <div class="min-w-0 flex-1 rounded-lg bg-neutral-950 px-3 py-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="text-xs font-semibold text-white">
+                      {{ comment.artist.name }}
+                    </p>
+                    {% if current_user.is_authenticated and comment.user_id ==
+                    current_user.id %}
+                    <form
+                      method="post"
+                      action="{{ url_for('delete_post_comment', comment_id=comment.id) }}"
+                      onsubmit="return confirm('Delete your comment?');"
+                    >
+                      <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                      />
+                      <button
+                        class="text-xs text-neutral-500 underline underline-offset-2 hover:text-red-300"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                  <p
+                    class="mt-0.5 max-h-12 overflow-y-auto whitespace-pre-wrap break-words text-sm text-neutral-300"
+                  >
+                    {{ comment.body }}
+                  </p>
+                  <time class="mt-1 block text-xs text-neutral-600"
+                    >{{ comment.timestamp|ph_time }}</time
+                  >
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% endif %} {% if current_user.is_authenticated %}
+            <form
+              method="post"
+              action="{{ url_for('add_post_comment', post_id=post.id) }}"
+              class="mt-4 flex items-start gap-3"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <label for="comment-{{ post.id }}" class="sr-only"
+                >Write a comment</label
+              >
+              <textarea
+                id="comment-{{ post.id }}"
+                name="body"
+                rows="1"
+                maxlength="1000"
+                required
+                placeholder="Write a comment..."
+                class="h-10 min-h-10 min-w-0 flex-1 resize-none rounded-md border-0 bg-neutral-950 px-3 py-2 text-sm text-white placeholder:text-neutral-500 ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass"
+              ></textarea>
+              <button
+                class="rounded-sm px-3 py-2.5 text-sm font-semibold text-brass hover:bg-white/5"
+              >
+                Post
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </article>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <div class="rounded-xl bg-neutral-900 p-8 text-center ring-1 ring-white/10">
+      <h2 class="font-display text-2xl text-white">
+        The feed is waiting for its first post
+      </h2>
+      <p class="mt-2 text-neutral-400">
+        Artists can share a painting, a work in progress, or a studio moment.
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+<dialog
+  id="media-viewer"
+  aria-label="Full-size media viewer"
+  class="m-auto h-screen max-h-none w-screen max-w-none border-0 bg-black/95 p-4 text-white backdrop:bg-black/90 sm:p-8"
+>
+  <div class="flex h-full w-full flex-col">
+    <div class="flex justify-end">
+      <button
+        type="button"
+        data-close-media
+        class="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/20"
+        aria-label="Close full-size media"
+      >
+        Close <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div
+      id="media-viewer-content"
+      class="flex min-h-0 flex-1 items-center justify-center py-3"
+    ></div>
+  </div>
+</dialog>
+<script>
+  document.addEventListener("submit", async function (event) {
+    var form = event.target;
+    if (!form.matches("#community-feed form[method='post']")) return;
+    if (event.defaultPrevented) return;
+
+    event.preventDefault();
+    if (form.dataset.submitting === "true") return;
+    form.dataset.submitting = "true";
+    var scrollPosition = window.scrollY;
+
+    var submitButton = event.submitter;
+    if (submitButton) submitButton.disabled = true;
+    var focusedId = document.activeElement.id;
+    var focusedForm = document.activeElement.closest("form");
+    var focusedAction = focusedForm && focusedForm.getAttribute("action");
+
+    try {
+      var response = await fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+        credentials: "same-origin",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
+      var responseHtml = await response.text();
+      var parsedPage = new DOMParser().parseFromString(
+        responseHtml,
+        "text/html",
+      );
+      var refreshedFeed = parsedPage.querySelector("#community-feed");
+
+      if (!response.ok || !refreshedFeed) {
+        if (response.redirected && response.url !== window.location.href) {
+          window.location.assign(response.url);
+          return;
+        }
+        var feedback = document.getElementById("flash-messages");
+        feedback.classList.remove("hidden");
+        feedback.innerHTML =
+          '<p class="rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/30">The action could not be completed. Please try again.</p>';
+        return;
+      }
+      var currentFeed = document.getElementById("community-feed");
+      currentFeed.style.overflowAnchor = "none";
+      currentFeed.replaceChildren(
+        ...Array.from(refreshedFeed.childNodes).map(function (node) {
+          return node.cloneNode(true);
+        }),
+      );
+
+      var currentFeedback = document.getElementById("flash-messages");
+      var refreshedFeedback = parsedPage.getElementById("flash-messages");
+      if (currentFeedback && refreshedFeedback) {
+        currentFeedback.className = refreshedFeedback.className;
+        currentFeedback.innerHTML = refreshedFeedback.innerHTML;
+      }
+
+      window.requestAnimationFrame(function () {
+        window.scrollTo(0, scrollPosition);
+        var focusTarget = focusedId ? document.getElementById(focusedId) : null;
+        if (!focusTarget && focusedAction) {
+          var forms = document.querySelectorAll("#community-feed form");
+          forms.forEach(function (candidate) {
+            if (candidate.getAttribute("action") === focusedAction) {
+              focusTarget = candidate.querySelector("button");
+            }
+          });
+        }
+        if (!focusTarget && form.action.indexOf("/delete") !== -1) {
+          focusTarget = document.getElementById("community-heading");
+        }
+        if (focusTarget) focusTarget.focus({ preventScroll: true });
+        window.requestAnimationFrame(function () {
+          window.scrollTo(0, scrollPosition);
+        });
+      });
+    } catch (error) {
+      var feedback = document.getElementById("flash-messages");
+      feedback.classList.remove("hidden");
+      feedback.innerHTML =
+        '<p class="rounded-md bg-red-500/10 px-4 py-3 text-sm text-red-200 ring-1 ring-red-400/30">Connection problem. Your action was not completed; please try again.</p>';
+    } finally {
+      form.dataset.submitting = "false";
+      if (submitButton) submitButton.disabled = false;
+    }
+  });
+
+  (function () {
+    var viewer = document.getElementById("media-viewer");
+    var content = document.getElementById("media-viewer-content");
+
+    document.addEventListener("click", function (event) {
+      var media = event.target.closest("[data-fullscreen-media]");
+      if (!media) return;
+      if (
+        media.dataset.mediaType === "video" &&
+        event.offsetY >= media.clientHeight - 56
+      ) {
+        return;
+      }
+
+      content.replaceChildren();
+      var expanded;
+      if (media.dataset.mediaType === "video") {
+        expanded = document.createElement("video");
+        expanded.controls = true;
+        expanded.autoplay = true;
+        expanded.playsInline = true;
+        expanded.className = "max-h-full max-w-full";
+        media.querySelectorAll("source").forEach(function (source) {
+          expanded.appendChild(source.cloneNode(true));
+        });
+        expanded.load();
+      } else {
+        expanded = document.createElement("img");
+        expanded.src = media.currentSrc || media.src;
+        expanded.alt = media.alt;
+        expanded.className = "max-h-full max-w-full object-contain";
+      }
+      content.appendChild(expanded);
+      viewer.showModal();
+    });
+
+    viewer.addEventListener("click", function (event) {
+      if (
+        event.target === viewer ||
+        event.target.closest("[data-close-media]")
+      ) {
+        viewer.close();
+      }
+    });
+    viewer.addEventListener("close", function () {
+      content.replaceChildren();
+    });
+  })();
+</script>
+{% endblock %}

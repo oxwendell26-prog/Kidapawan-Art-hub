@@ -24,6 +24,19 @@ endblock %} {% block content %}
           class="mt-4 inline-block text-sm font-medium text-white underline underline-offset-4 hover:text-brass"
           >Edit your profile</a
         >
+        {% elif current_user.is_authenticated and current_user.account_type ==
+        'client' %}
+        <a
+          href="{{ url_for('artist_message', artist_id=artist.id) }}"
+          class="mt-4 inline-block rounded-sm bg-brass px-5 py-2.5 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
+          >Message this artist</a
+        >
+        {% else %}
+        <a
+          href="{{ url_for('client_register', next=url_for('artist_message', artist_id=artist.id)) }}"
+          class="mt-4 inline-block rounded-sm bg-brass px-5 py-2.5 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
+          >Create a client account to message</a
+        >
         {% endif %}
       </div>
     </div>
@@ -47,14 +60,12 @@ endblock %} {% block content %}
       >
         <div>
           <dt class="text-sm text-neutral-400">Artworks</dt>
-          <dd class="font-display text-2xl text-white">
-            {{ artist.works|length }}
-          </dd>
+          <dd class="font-display text-2xl text-white">{{ works|length }}</dd>
         </div>
         <div>
           <dt class="text-sm text-neutral-400">Available</dt>
           <dd class="font-display text-2xl text-white">
-            {{ artist.works|selectattr('available')|list|length }}
+            {{ works|selectattr('available')|list|length }}
           </dd>
         </div>
         {% if artist.experience %}
@@ -77,9 +88,9 @@ endblock %} {% block content %}
   <h2 class="font-display text-3xl text-white sm:text-4xl">
     Artworks by {{ artist.name }}
   </h2>
-  {% if artist.works %}
+  {% if works %}
   <ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    {% for p in artist.works %}
+    {% for p in works %}
     <li>
       <article
         class="group relative h-full overflow-hidden rounded-lg bg-neutral-900 ring-1 ring-white/10 transition hover:ring-brass/60 focus-within:ring-brass/60"
@@ -106,13 +117,20 @@ endblock %} {% block content %}
             {{ p.note }}
           </p>
           {% endif %} {% if p.can_buy and not (current_user.is_authenticated and
-          current_user.id == p.artist_id) %}
+          current_user.id == p.artist_id) %} {% if current_user.is_authenticated
+          and current_user.account_type == 'client' %}
           <a
             href="{{ url_for('checkout', artwork_id=p.id) }}"
             class="relative z-10 mt-4 inline-block rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
             >Checkout</a
           >
-          {% endif %}
+          {% else %}
+          <a
+            href="{{ url_for('client_register', next=url_for('checkout', artwork_id=p.id)) }}"
+            class="relative z-10 mt-4 inline-block rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
+            >Create client account to buy</a
+          >
+          {% endif %} {% endif %}
         </div>
       </article>
     </li>

@@ -4,8 +4,8 @@ content %}
 <section class="mx-auto max-w-md px-5 py-16 sm:py-24">
   <h1 class="font-display text-3xl text-white">Track your order</h1>
   <p class="mt-2 text-neutral-400">
-    Enter the order number and the email you used at checkout to see the status
-    of your order.
+    Sign in with the client account used at checkout, then enter your order
+    number. You can only view orders linked to your account.
   </p>
   <form
     method="post"
@@ -14,8 +14,7 @@ content %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     {{ field('order_number', 'Order number', 'text',
     form.get('order_number',''), True, 'off', 'Shown on your order page, for
-    example #12.') }} {{ field('email', 'Email', 'email', form.get('email',''),
-    True, 'email') }}
+    example #12.') }}
     <button
       class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
     >

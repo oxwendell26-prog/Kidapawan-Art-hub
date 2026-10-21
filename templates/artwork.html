@@ -51,7 +51,8 @@ Kidapawan City Visual Artists{% endblock %} {% block content %}
         {% elif current_user.is_authenticated and current_user.id ==
         artwork.artist_id %}
         <p class="mt-2 text-sm text-neutral-400">This is your artwork.</p>
-        {% elif artwork.price %}
+        {% elif artwork.price and current_user.is_authenticated and
+        current_user.account_type == 'client' %}
         <a
           href="{{ url_for('checkout', artwork_id=artwork.id) }}"
           class="mt-5 inline-block rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
@@ -61,9 +62,34 @@ Kidapawan City Visual Artists{% endblock %} {% block content %}
           No payment is taken on this site. The artist will contact you to
           arrange payment and delivery.
         </p>
+        {% elif artwork.price %}
+        <a
+          href="{{ url_for('client_register', next=url_for('checkout', artwork_id=artwork.id)) }}"
+          class="mt-5 inline-block rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300"
+          >Create a client account to buy</a
+        >
         {% else %}
         <p class="mt-2 text-sm text-neutral-400">
           The artist hasn’t set a price yet, so this painting can’t be ordered.
+        </p>
+        {% endif %} {% if current_user.id != artwork.artist_id %} {% if
+        current_user.is_authenticated and current_user.account_type == 'client'
+        %}
+        <a
+          href="{{ url_for('new_conversation', artwork_id=artwork.id) }}"
+          class="mt-5 inline-block rounded-sm px-6 py-3 text-center font-semibold text-white ring-1 ring-white/25 hover:bg-white/5"
+          >Message the artist</a
+        >
+        {% else %}
+        <a
+          href="{{ url_for('client_register', next=url_for('new_conversation', artwork_id=artwork.id)) }}"
+          class="mt-5 inline-block rounded-sm px-6 py-3 text-center font-semibold text-white ring-1 ring-white/25 hover:bg-white/5"
+          >Create a client account to message</a
+        >
+        {% endif %}
+        <p class="mt-3 text-sm text-neutral-400">
+          Ask the artist a question or discuss this painting. A client account
+          is required.
         </p>
         {% endif %}
       </div>

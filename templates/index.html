@@ -1,52 +1,27 @@
 {% extends "base.html" %} {% from "macros.html" import canvas, avatar %} {%
 block head %}
-<style>
-  /* The picture light above the hero painting */
-  .picture-light {
-    position: relative;
-  }
-  .picture-light::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    width: 30rem;
-    max-width: 100vw;
-    height: 34rem;
-    transform: translateX(-50%);
-    pointer-events: none;
-    z-index: 2;
-    background: linear-gradient(
-      to bottom,
-      rgba(255, 236, 190, 0.26),
-      rgba(255, 236, 190, 0)
-    );
-    clip-path: polygon(43% 0, 57% 0, 100% 100%, 0 100%);
-    animation: light-on 1.8s ease-out 0.3s both;
-  }
-  @keyframes light-on {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .picture-light::after {
-      animation: none;
-    }
-  }
-</style>
 {% endblock %} {% block content %}
 
 <!-- Hero -->
 <section class="relative overflow-hidden border-b border-white/10">
+  {% if hero and hero.image %}
+  <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
+    <img
+      src="{{ url_for('static', filename='uploads/' ~ hero.image) }}"
+      alt=""
+      class="h-full w-full scale-110 object-cover blur-[8px] opacity-35"
+    />
+    <div class="absolute inset-0 bg-neutral-950/75"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/80 to-neutral-950/45"
+    ></div>
+  </div>
+  {% endif %}
   <div class="spotlight absolute inset-0" aria-hidden="true"></div>
   <div
-    class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[1.05fr_1fr] lg:pb-28 lg:pt-20"
+    class="relative mx-auto flex min-h-[28rem] max-w-7xl items-center px-5 py-20 sm:px-8 lg:min-h-[34rem] lg:py-28"
   >
-    <div>
+    <div class="max-w-3xl">
       <h1
         class="font-display text-4xl leading-[1.1] text-white sm:text-5xl lg:text-6xl"
       >
@@ -84,48 +59,6 @@ block head %}
       </p>
       {% endif %}
     </div>
-
-    <figure class="mx-auto w-full max-w-md">
-      <div
-        class="picture-light mx-auto mb-6 h-2 w-40 rounded-full bg-brass shadow-[0_0_24px_rgba(233,180,32,.5)]"
-        aria-hidden="true"
-      ></div>
-      <div
-        class="bg-neutral-900 p-3 shadow-2xl shadow-black/70 ring-1 ring-white/10"
-      >
-        {% if hero %} {{ canvas(hero, 'aspect-[3/4] ring-1 ring-white/20') }} {%
-        else %}
-        <div
-          class="flex aspect-[3/4] items-center justify-center border-2 border-dashed border-white/20 p-8 text-center text-neutral-400"
-        >
-          Your painting could hang here.
-        </div>
-        {% endif %}
-      </div>
-      {% if hero %}
-      <figcaption class="mt-5 border-l-2 border-brass pl-4">
-        <p class="font-display text-xl text-white">
-          <a
-            href="{{ url_for('artwork_detail', artwork_id=hero.id) }}"
-            class="hover:text-brass"
-            >{{ hero.title }}</a
-          >
-        </p>
-        <p class="text-sm text-neutral-300">
-          <a
-            href="{{ url_for('artist_detail', artist_id=hero.artist_id) }}"
-            class="underline-offset-4 hover:text-white hover:underline"
-            >{{ hero.artist_name }}</a
-          >, {{ hero.year }}
-        </p>
-        {% if hero.size %}
-        <p class="text-sm text-neutral-400">Oil on canvas, {{ hero.size }}</p>
-        {% endif %} {% if hero.note %}
-        <p class="mt-2 text-sm text-neutral-400">{{ hero.note }}</p>
-        {% endif %}
-      </figcaption>
-      {% endif %}
-    </figure>
   </div>
 </section>
 
@@ -211,7 +144,8 @@ block head %}
           <p class="text-sm text-brass">{{ a.focus }}</p>
           {% endif %}
           <p class="mt-1 text-sm text-neutral-400">
-            {{ a.works|length }} artwork{{ '' if a.works|length == 1 else 's' }}
+            {{ a.public_works|length }} artwork{{ '' if a.public_works|length ==
+            1 else 's' }}
           </p>
         </div>
       </a>

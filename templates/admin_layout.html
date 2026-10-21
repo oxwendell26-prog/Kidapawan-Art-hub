@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% block content %}
+<section class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+  <div class="grid gap-8 lg:grid-cols-[13rem_1fr]">
+    <aside aria-label="Admin menu">
+      <p class="px-4 text-sm font-semibold text-brass">Administration</p>
+      <nav
+        class="mt-3 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
+      >
+        {% for endpoint, label in [('admin_dashboard', 'Overview'),
+        ('admin_artists', 'Accounts'), ('admin_artworks', 'Artworks'),
+        ('admin_orders', 'Orders'), ('admin_artist_applications', 'Artist
+        applications')] %} {% set active = request.endpoint == endpoint %}
+        <a
+          href="{{ url_for(endpoint) }}"
+          {%
+          if
+          active
+          %}aria-current="page"
+          {%
+          endif
+          %}
+          class="flex shrink-0 items-center rounded-md px-4 py-2.5 text-sm font-medium transition
+                  {{ 'bg-white/10 text-white ring-1 ring-white/15' if active else 'text-neutral-300 hover:bg-white/5 hover:text-white' }}"
+          >{{ label }}</a
+        >
+        {% endfor %}
+        <hr class="my-2 hidden border-white/10 lg:block" />
+        <a
+          href="{{ url_for('dashboard') }}"
+          class="flex shrink-0 items-center rounded-md px-4 py-2.5 text-sm font-medium text-neutral-300 hover:bg-white/5 hover:text-white"
+          >My dashboard</a
+        >
+      </nav>
+    </aside>
+    <div class="min-w-0">{% block panel %}{% endblock %}</div>
+  </div>
+</section>
+{% endblock %}

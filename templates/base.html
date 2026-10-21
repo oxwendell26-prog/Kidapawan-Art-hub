@@ -47,103 +47,356 @@
         outline: 2px solid #e9b420;
         outline-offset: 3px;
       }
+      .page-enter {
+        opacity: 0;
+        transform: translateY(28px) scale(0.99);
+        transition:
+          opacity 650ms ease,
+          transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+      }
+      .page-enter.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      #scroll-progress {
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 80ms linear;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .page-enter,
+        .page-enter.is-visible {
+          opacity: 1;
+          transform: none;
+          transition: none;
+        }
+        #scroll-progress {
+          transition: none;
+        }
+      }
     </style>
     {% block head %}{% endblock %}
   </head>
   <body
     class="flex min-h-screen flex-col bg-neutral-950 font-sans text-neutral-300 antialiased"
   >
+    <div
+      id="scroll-progress"
+      aria-hidden="true"
+      class="fixed inset-x-0 top-0 z-50 h-1 bg-brass shadow-[0_0_10px_rgba(233,180,32,0.75)]"
+    ></div>
     <header
-      class="sticky top-0 z-30 border-b border-white/10 bg-neutral-950/80 backdrop-blur"
+      class="sticky top-0 z-30 border-b border-white/10 bg-neutral-950/95 backdrop-blur"
     >
-      <div
-        class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8"
-      >
-        <a
-          href="{{ url_for('home') }}"
-          class="font-display text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass"
-          >Kidapawan City Visual Artists</a
+      <div class="mx-auto max-w-7xl px-5 py-3 sm:px-8">
+        <div
+          class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
         >
-        <nav
-          aria-label="Main menu"
-          class="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium"
-        >
-          <a href="{{ url_for('home') }}" class="py-1 hover:text-white">Home</a>
-          <a href="{{ url_for('artworks') }}" class="py-1 hover:text-white"
-            >Artworks</a
-          >
-          <a href="{{ url_for('artists') }}" class="py-1 hover:text-white"
-            >Artists</a
-          >
-          <a
-            href="{{ url_for('track_order') }}"
-            class="py-1 hover:bg-white/5 hover:text-white"
-            >Track order</a
-          >
-          {% if current_user.is_authenticated %}
-          <a href="{{ url_for('dashboard') }}" class="py-1 hover:text-white"
-            >Dashboard</a
-          >
-          <a
-            href="{{ url_for('orders') }}"
-            class="py-1 hover:bg-white/5 hover:text-white"
-            >Orders</a
-          >
-          <a
-            href="{{ url_for('notifications') }}"
-            class="inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 ring-1 ring-white/20 hover:bg-white/5 hover:text-white"
-            aria-label="Notifications{% if unread_notifications %}, {{ unread_notifications }} unread{% endif %}"
-          >
-            <svg
-              class="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="1.5"
-              aria-hidden="true"
+          <div class="flex min-w-0 items-center gap-3">
+            <a
+              href="{{ url_for('home') }}"
+              class="truncate font-display text-lg text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass sm:text-xl"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+              Kidapawan City Visual Artists
+            </a>
+            <div
+              class="hidden items-center gap-1 border-l border-white/10 pl-3 sm:flex"
+              aria-label="Page history"
+            >
+              <button
+                type="button"
+                data-history-back
+                aria-label="Go back to the previous page"
+                title="Back"
+                class="rounded p-1.5 text-neutral-400 transition hover:bg-white/10 hover:text-white disabled:opacity-40"
+              >
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10 19l-7-7 7-7M3 12h18"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                data-history-forward
+                aria-label="Go forward to the next page"
+                title="Forward"
+                class="rounded p-1.5 text-neutral-400 transition hover:bg-white/10 hover:text-white disabled:opacity-40"
+              >
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14 5l7 7-7 7m7-7H3"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+            {% if current_user.is_authenticated %} {% if current_user.is_admin
+            %}
+            <a
+              href="{{ url_for('admin_dashboard') }}"
+              class="hidden rounded-sm px-3 py-2 text-sm font-semibold text-brass hover:bg-brass/10 sm:inline-flex"
+              >Admin</a
+            >
+            {% endif %}
+            <a
+              href="{{ url_for('messages') }}"
+              class="inline-flex items-center gap-2 rounded-sm px-3 py-2 text-sm font-medium text-neutral-200 transition hover:bg-white/5 hover:text-white"
+              aria-label="Messages{% if unread_messages %}, {{ unread_messages }} unread{% endif %}"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M7 8h10M7 12h6m-9 8 3.2-3.2A8 8 0 1 1 20 14"
+                />
+              </svg>
+              <span class="hidden sm:inline">Messages</span>
+              {% if unread_messages %}<span
+                class="rounded-full bg-brass px-2 py-0.5 text-xs font-semibold text-neutral-950"
+                >{{ unread_messages }}</span
+              >{% endif %}
+            </a>
+            <details class="group relative">
+              <summary
+                class="flex cursor-pointer list-none items-center gap-2 rounded-sm px-3 py-2 text-sm font-medium text-white ring-1 ring-white/15 transition hover:bg-white/5"
+              >
+                <span class="max-w-28 truncate"
+                  >{{ 'Artist' if current_user.account_type == 'artist' else
+                  'Client' }} account</span
+                >
+                <svg
+                  class="h-4 w-4 text-neutral-400 transition group-open:rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </summary>
+              <div
+                class="absolute right-0 top-full z-40 mt-2 w-56 rounded-md border border-white/10 bg-neutral-900 p-2 shadow-xl shadow-black/40"
+              >
+                {% if current_user.account_type == 'artist' %} {% if
+                current_user.is_approved %}
+                <a
+                  href="{{ url_for('dashboard') }}"
+                  class="block rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  >Dashboard</a
+                >
+                <a
+                  href="{{ url_for('orders') }}"
+                  class="flex items-center justify-between rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  ><span>Orders</span>{% if pending_orders %}<span
+                    class="rounded-full bg-brass px-2 py-0.5 text-xs font-semibold text-neutral-950"
+                    >{{ pending_orders }}</span
+                  >{% endif %}</a
+                >
+                <a
+                  href="{{ url_for('notifications') }}"
+                  class="flex items-center justify-between rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  ><span>Notifications</span>{% if unread_notifications %}<span
+                    class="rounded-full bg-brass px-2 py-0.5 text-xs font-semibold text-neutral-950"
+                    >{{ unread_notifications }}</span
+                  >{% endif %}</a
+                >
+                <a
+                  href="{{ url_for('profile') }}"
+                  class="block rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  >Profile</a
+                >
+                {% else %}
+                <a
+                  href="{{ url_for('artist_application_status') }}"
+                  class="block rounded px-3 py-2 text-sm text-amber-200 hover:bg-white/5"
+                  >Application pending</a
+                >
+                {% endif %} {% elif current_user.account_type == 'client' %}
+                <a
+                  href="{{ url_for('client_apply_as_artist') }}"
+                  class="block rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  >Apply as artist</a
+                >
+                {% endif %}
+                <a
+                  href="{{ url_for('settings') }}"
+                  class="block rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  >Settings</a
+                >
+                <div class="my-1 border-t border-white/10"></div>
+                <form method="post" action="{{ url_for('logout') }}">
+                  <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                  />
+                  <button
+                    class="w-full rounded px-3 py-2 text-left text-sm text-neutral-300 hover:bg-white/5 hover:text-white"
+                  >
+                    Log out
+                  </button>
+                </form>
+              </div>
+            </details>
+            {% else %}
+            <a
+              href="{{ url_for('login') }}"
+              class="rounded-sm px-3 py-2 text-sm font-medium text-neutral-200 transition hover:bg-white/5 hover:text-white"
+              >Log in</a
+            >
+            <details class="group relative">
+              <summary
+                class="flex cursor-pointer list-none items-center gap-2 rounded-sm bg-brass px-3 py-2 text-sm font-semibold text-neutral-950 transition hover:bg-amber-300"
+              >
+                Sign up
+                <svg
+                  class="h-4 w-4 transition group-open:rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </summary>
+              <div
+                class="absolute right-0 top-full z-40 mt-2 w-48 rounded-md border border-white/10 bg-neutral-900 p-2 shadow-xl shadow-black/40"
+              >
+                <a
+                  href="{{ url_for('register') }}"
+                  class="block rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  >Artist account</a
+                >
+                <a
+                  href="{{ url_for('client_register') }}"
+                  class="block rounded px-3 py-2 text-sm text-neutral-200 hover:bg-white/5 hover:text-white"
+                  >Client account</a
+                >
+              </div>
+            </details>
+            {% endif %}
+          </div>
+        </div>
+
+        <div
+          class="mt-3 flex flex-col gap-3 border-t border-white/10 pt-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <nav
+            aria-label="Browse"
+            class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium"
+          >
+            <a
+              href="{{ url_for('home') }}"
+              class="py-1 text-neutral-300 transition hover:text-white"
+              >Home</a
+            >
+            <a
+              href="{{ url_for('artworks') }}"
+              class="py-1 text-neutral-300 transition hover:text-white"
+              >Artworks</a
+            >
+            <a
+              href="{{ url_for('artists') }}"
+              class="py-1 text-neutral-300 transition hover:text-white"
+              >Artists</a
+            >
+            <a
+              href="{{ url_for('community') }}"
+              class="py-1 text-neutral-300 transition hover:text-white"
+              >Community</a
+            >
+            <a
+              href="{{ url_for('track_order') }}"
+              class="py-1 text-neutral-300 transition hover:text-white"
+              >Track order</a
+            >
+          </nav>
+          <form
+            action="{{ url_for('search') }}"
+            method="get"
+            role="search"
+            class="w-full sm:w-64 sm:shrink-0"
+          >
+            <label for="site-search" class="sr-only"
+              >Search paintings and artists</label
+            >
+            <div class="relative">
+              <input
+                id="site-search"
+                name="q"
+                type="search"
+                maxlength="100"
+                value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}"
+                placeholder="Paintings or artists"
+                class="w-full rounded-md border-0 bg-neutral-900 py-2 pl-3 pr-10 text-sm text-white ring-1 ring-white/15 placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-brass"
               />
-            </svg>
-            Notifications {% if unread_notifications %}<span
-              class="py-0.5 text-xs font-semibold text-neutral-950"
-              >{{ unread_notifications }}</span
-            >{% endif %}
-          </a>
-          <a href="{{ url_for('profile') }}" class="py-1 hover:text-white"
-            >Profile</a
-          >
-          <a href="{{ url_for('settings') }}" class="py-1 hover:text-white"
-            >Settings</a
-          >
-          <form method="post" action="{{ url_for('logout') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <button class="py-1 hover:bg-white/5 hover:text-white">
-              Log out
-            </button>
+              <button
+                type="submit"
+                aria-label="Search"
+                class="absolute inset-y-0 right-0 inline-flex w-9 items-center justify-center text-neutral-400 hover:text-white"
+              >
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="10.8" cy="10.8" r="6.8" />
+                  <path stroke-linecap="round" d="m16 16 5 5" />
+                </svg>
+              </button>
+            </div>
           </form>
-          {% else %}
-          <a href="{{ url_for('login') }}" class="py-1 hover:text-white"
-            >Log in</a
-          >
-          <a
-            href="{{ url_for('register') }}"
-            class="rounded-sm bg-brass px-3 py-1.5 font-semibold text-neutral-950 hover:bg-amber-300"
-            >Sign up</a
-          >
-          {% endif %}
-        </nav>
+        </div>
       </div>
     </header>
 
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
     <div
-      class="mx-auto w-full max-w-7xl space-y-2 px-5 pt-6 sm:px-8"
+      id="flash-messages"
+      class="mx-auto w-full max-w-7xl space-y-2 px-5 pt-6 sm:px-8 {{ 'hidden' if not messages }}"
       role="status"
+      aria-live="polite"
     >
       {% for cat, msg in messages %}
       <p
@@ -153,34 +406,120 @@
       </p>
       {% endfor %}
     </div>
-    {% endif %} {% endwith %}
+    {% endwith %}
 
-    <main class="flex-1">{% block content %}{% endblock %}</main>
+    <main data-page-enter class="flex-1">
+      {% block content %}{% endblock %}
+    </main>
 
     <footer class="border-t border-white/10">
       <p class="mx-auto max-w-7xl px-5 py-6 text-sm text-neutral-400 sm:px-8">
         Kidapawan City Visual Artists.
       </p>
     </footer>
+    <button
+      id="back-to-top"
+      type="button"
+      aria-label="Back to top"
+      class="fixed bottom-5 right-5 z-40 hidden rounded-full bg-brass p-3 text-neutral-950 shadow-lg shadow-black/30 transition hover:-translate-y-1 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+    >
+      <svg
+        class="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m5 15 7-7 7 7"
+        />
+      </svg>
+    </button>
     <script>
-      document.querySelectorAll("[data-password-toggle]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const wrapper = button.closest(".relative");
-          const input = wrapper.querySelector("input");
-          const showPassword = input.type === "password";
-          input.type = showPassword ? "text" : "password";
-          button.setAttribute("aria-pressed", String(showPassword));
-          button.setAttribute(
-            "aria-label",
-            showPassword ? "Hide password" : "Show password",
-          );
-          button
-            .querySelector("[data-eye-open]")
-            .classList.toggle("hidden", showPassword);
-          button
-            .querySelector("[data-eye-closed]")
-            .classList.toggle("hidden", !showPassword);
+      var reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      var pageSections = document.querySelectorAll("[data-page-enter]");
+      if (!reducedMotion && "IntersectionObserver" in window) {
+        var pageObserver = new IntersectionObserver(
+          function (entries, observer) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.08 },
+        );
+        pageSections.forEach(function (section) {
+          section.classList.add("page-enter");
+          pageObserver.observe(section);
         });
+      } else {
+        pageSections.forEach(function (section) {
+          section.classList.add("page-enter", "is-visible");
+        });
+      }
+
+      var backToTop = document.getElementById("back-to-top");
+      var historyBack = document.querySelector("[data-history-back]");
+      var historyForward = document.querySelector("[data-history-forward]");
+      var scrollProgress = document.getElementById("scroll-progress");
+      var scrollUpdatePending = false;
+      window.addEventListener(
+        "scroll",
+        function () {
+          if (scrollUpdatePending) return;
+          scrollUpdatePending = true;
+          window.requestAnimationFrame(function () {
+            var scrollableHeight =
+              document.documentElement.scrollHeight - window.innerHeight;
+            var scrollPercent =
+              scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+            scrollProgress.style.transform =
+              "scaleX(" + Math.min(1, Math.max(0, scrollPercent)) + ")";
+            backToTop.classList.toggle("hidden", window.scrollY < 420);
+            scrollUpdatePending = false;
+          });
+        },
+        { passive: true },
+      );
+      backToTop.addEventListener("click", function () {
+        window.scrollTo({
+          top: 0,
+          behavior: reducedMotion ? "auto" : "smooth",
+        });
+      });
+      historyBack.disabled = window.history.length < 2;
+      historyBack.addEventListener("click", function () {
+        window.history.back();
+      });
+      historyForward.addEventListener("click", function () {
+        window.history.forward();
+      });
+      window.dispatchEvent(new Event("scroll"));
+
+      // Show or hide a password when its eye button is pressed
+      document.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-password-toggle]");
+        if (!btn) return;
+        var input = btn.parentElement.querySelector("input");
+        if (!input) return;
+        var show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.setAttribute("aria-pressed", show ? "true" : "false");
+        btn.setAttribute(
+          "aria-label",
+          show ? "Hide password" : "Show password",
+        );
+        btn.querySelector("[data-eye-open]").classList.toggle("hidden", show);
+        btn
+          .querySelector("[data-eye-closed]")
+          .classList.toggle("hidden", !show);
       });
     </script>
   </body>

@@ -44,13 +44,20 @@ content %}
             {{ p.note }}
           </p>
           {% endif %} {% if p.can_buy and not (current_user.is_authenticated and
-          current_user.id == p.artist_id) %}
+          current_user.id == p.artist_id) %} {% if current_user.is_authenticated
+          and current_user.account_type == 'client' %}
           <a
             href="{{ url_for('checkout', artwork_id=p.id) }}"
             class="relative z-10 mt-4 inline-block rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
             >Checkout</a
           >
-          {% endif %}
+          {% else %}
+          <a
+            href="{{ url_for('client_register', next=url_for('checkout', artwork_id=p.id)) }}"
+            class="relative z-10 mt-4 inline-block rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300"
+            >Create client account to buy</a
+          >
+          {% endif %} {% endif %}
         </div>
       </article>
     </li>

@@ -1,0 +1,43 @@
+{% extends "base.html" %} {% block title %}Message {{ artist.name }} | Kidapawan
+City Visual Artists{% endblock %} {% block content %}
+<section class="mx-auto max-w-2xl px-5 py-12 sm:px-8 sm:py-16">
+  <a
+    href="{{ url_for('artist_detail', artist_id=artist.id) }}"
+    class="text-sm text-neutral-400 underline underline-offset-4 hover:text-white"
+    >Back to {{ artist.name }}’s profile</a
+  >
+  <h1 class="mt-4 font-display text-3xl text-white sm:text-4xl">
+    Message {{ artist.name }}
+  </h1>
+  <p class="mt-2 text-neutral-400">
+    Start a private conversation with this artist.
+  </p>
+
+  <form
+    method="post"
+    class="mt-8 space-y-4 rounded-lg bg-neutral-900 p-6 ring-1 ring-white/10"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <div>
+      <label for="message" class="block text-sm font-medium text-white"
+        >Message</label
+      >
+      <textarea
+        id="message"
+        name="message"
+        rows="6"
+        maxlength="2000"
+        required
+        class="mt-1.5 w-full rounded-md border-0 bg-neutral-950 px-3 py-2.5 text-white ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass"
+      >
+{{ message }}</textarea
+      >
+    </div>
+    <button
+      class="rounded-sm bg-brass px-5 py-2.5 font-semibold text-neutral-950 hover:bg-amber-300"
+    >
+      Send message
+    </button>
+  </form>
+</section>
+{% endblock %}

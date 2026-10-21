@@ -1,9 +1,14 @@
 {% extends "base.html" %} {% from "macros.html" import field %} {% block title
 %}Sign up | Kidapawan City Visual Artists{% endblock %} {% block content %}
 <section class="mx-auto max-w-xl px-5 py-16 sm:py-24">
-  <h1 class="font-display text-3xl text-white">Sign up as an artist</h1>
+  <h1 class="font-display text-3xl text-white">
+    {{ 'Create a client account' if account_type == 'client' else 'Sign up as an
+    artist' }}
+  </h1>
   <p class="mt-2 text-neutral-400">
-    Create an account to post your own artworks in the gallery.
+    {% if account_type == 'client' %} Create an account to message artists and
+    like or comment on community posts. {% else %} Apply for an artist account.
+    Uploads and artist tools are available after admin approval. {% endif %}
   </p>
   <form
     method="post"
@@ -19,6 +24,7 @@
       'Confirm password', 'password', '', True, 'new-password', '',
       errors.get('confirm','')) }}
     </div>
+    {% if account_type == 'artist' %}
     <div class="grid gap-5 sm:grid-cols-2">
       {{ field('focus', 'Art focus (optional)', 'text', form.get('focus',''),
       False, 'off', 'Example: Landscapes and nature') }} {{ field('experience',
@@ -39,18 +45,30 @@
 {{ form.get('bio','') }}</textarea
       >
     </div>
+    {% endif %}
     <button
       class="w-full rounded-sm bg-brass px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
     >
-      Create account
+      {{ 'Create client account' if account_type == 'client' else 'Submit artist
+      application' }}
     </button>
   </form>
   <p class="mt-6 text-sm text-neutral-400">
     Already have an account?
     <a
-      href="{{ url_for('login') }}"
+      href="{{ url_for('artist_login' if account_type == 'artist' else 'client_login') }}"
       class="text-white underline underline-offset-4 hover:text-brass"
       >Log in</a
+    >
+  </p>
+  <p class="mt-3 text-sm text-neutral-400">
+    {% if account_type == 'client' %}Want to share artwork?{% else %}Looking to
+    buy or follow artists?{% endif %}
+    <a
+      href="{{ url_for('register' if account_type == 'client' else 'client_register') }}"
+      class="text-white underline underline-offset-4 hover:text-brass"
+      >{{ 'Create an artist account' if account_type == 'client' else 'Create a
+      client account' }}</a
     >
   </p>
 </section>

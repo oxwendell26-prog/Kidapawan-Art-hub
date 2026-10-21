@@ -15,6 +15,7 @@
 
   <div class="mt-6 flex flex-wrap gap-3">
     <a href="{{ url_for('orders') }}" class="rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300">Orders{% if pending_orders %} ({{ pending_orders }} new){% endif %}</a>
+    <a href="{{ url_for('messages') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Messages{% if unread_messages %} ({{ unread_messages }} new){% endif %}</a>
     <a href="{{ url_for('notifications') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Notifications{% if unread_notifications %} ({{ unread_notifications }} unread){% endif %}</a>
     <a href="{{ url_for('profile') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Edit profile</a>
     <a href="{{ url_for('settings') }}" class="rounded-sm px-4 py-2 text-sm font-medium text-white ring-1 ring-white/25 hover:bg-white/5">Settings</a>
@@ -72,14 +73,23 @@
               <h3 class="font-display text-lg text-white">{{ p.title }}</h3>
               <p class="text-sm text-neutral-300">{{ p.year }}{% if p.size %}, {{ p.size }}{% endif %}</p>
               <p class="text-sm {{ 'text-emerald-300' if p.status_label == 'Available' else 'text-amber-300' if p.status_label == 'Reserved' else 'text-neutral-400' }}">{{ p.status_label }}</p>
+              {% if p.hidden %}<p class="text-sm text-amber-300">Hidden by an administrator</p>{% endif %}
               <p class="mt-1 text-sm text-neutral-200">{{ p.price_label }}</p>
+              <a href="{{ url_for('edit_artwork', artwork_id=p.id) }}"
+                class="mt-3 inline-block rounded-sm bg-brass px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-300">
+                Edit details
+              </a>
               <form method="post" action="{{ url_for('update_price', artwork_id=p.id) }}" class="mt-3 flex gap-2">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label for="price-{{ p.id }}" class="sr-only">Price in pesos</label>
-                <input id="price-{{ p.id }}" name="price" type="number" min="1" step="1" value="{{ p.price or '' }}" placeholder="Price (₱)"
+                <input id="price-{{ p.id }}" name="price" type="number" min="1" step="1" value="{{ p.price or '' }}" placeholder="Price (₱)" {% if p.reserved %}disabled{% endif %}
                   class="w-full min-w-0 rounded-md border-0 bg-neutral-950 px-3 py-1.5 text-sm text-white ring-1 ring-white/15 focus:outline-none focus:ring-2 focus:ring-brass">
-                <button class="shrink-0 rounded-sm px-3 py-1.5 text-sm text-white ring-1 ring-white/20 hover:bg-white/5">Save price</button>
+                <button {% if p.reserved %}disabled{% endif %}
+                  class="shrink-0 rounded-sm px-3 py-1.5 text-sm text-white ring-1 ring-white/20 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50">Save price</button>
               </form>
+              {% if p.reserved %}
+              <p class="mt-2 text-xs text-amber-300">Price and availability are locked while there’s an active order.</p>
+              {% endif %}
               <form method="post" action="{{ url_for('delete_artwork', artwork_id=p.id) }}" class="mt-4"
                     onsubmit="return confirm('Delete “{{ p.title|e }}”? This cannot be undone.')">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
